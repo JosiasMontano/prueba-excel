@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Datos con Exportación a Excel</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            flex: 1;
+        }
+        #pasarExcel {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #exportar {
+            background-color: #2196F3;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .suma-container {
+            background-color: #e9f7ef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        #suma {
+            font-size: 18px;
+            color: #2E7D32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro de Datos</h1>
+        
+        <div class="form-group">
+            <label for="fila">Fila:</label>
+            <input type="text" id="fila">
+        </div>
+        
+        <div class="form-group">
+            <label for="calle">Calle:</label>
+            <input type="text" id="calle">
+        </div>
+        
+        <div class="form-group">
+            <label for="camaraSuperior">Cámara Superior:</label>
+            <input type="text" id="camaraSuperior">
+        </div>
+        
+        <div class="form-group">
+            <label for="camaraInferior">Cámara Inferior:</label>
+            <input type="text" id="camaraInferior">
+        </div>
+        
+        <div class="form-group">
+            <label for="longitudP">Longitud P:</label>
+            <input type="number" id="longitudP" oninput="calcularSuma()">
+        </div>
+        
+        <div class="form-group">
+            <label for="longitudT">Longitud T:</label>
+            <input type="number" id="longitudT" oninput="calcularSuma()">
+        </div>
+        
+        <div class="suma-container">
+            <div>Suma de longitudes: <span id="suma">0</span></div>
+        </div>
+        
+        <div class="buttons">
+            <button id="pasarExcel" onclick="agregarRegistro()">Pasar a Excel</button>
+            <button id="exportar" onclick="exportarExcel()">Exportar Excel</button>
+        </div>
+    </div>
+
+    <script>
+        let registros = [];
+        let contadorFila = 2; 
+
+        function calcularSuma() {
+            const longitudP = parseFloat(document.getElementById('longitudP').value) || 0;
+            const longitudT = parseFloat(document.getElementById('longitudT').value) || 0;
+            const suma = longitudP + longitudT;
+            document.getElementById('suma').textContent = suma;
+        }
+
+        function agregarRegistro() {
+           
+            const fila = document.getElementById('fila').value;
+            const calle = document.getElementById('calle').value;
+            const camaraSuperior = document.getElementById('camaraSuperior').value;
+            const camaraInferior = document.getElementById('camaraInferior').value;
+            const longitudP = parseFloat(document.getElementById('longitudP').value) || 0;
+            const longitudT = parseFloat(document.getElementById('longitudT').value) || 0;
+            const suma = longitudP + longitudT;
+
+          
+            if (!fila || !calle || !camaraSuperior || !camaraInferior || isNaN(longitudP) || isNaN(longitudT)) {
+                alert("Por favor complete todos los campos antes de continuar");
+                return;
+            }
+
+           
+            registros.push({
+                fila,
+                calle,
+                camaraSuperior,
+                camaraInferior,
+                longitudP,
+                longitudT,
+                suma
+            });
+
+
+            document.getElementById('fila').value = '';
+            document.getElementById('calle').value = '';
+            document.getElementById('camaraSuperior').value = '';
+            document.getElementById('camaraInferior').value = '';
+            document.getElementById('longitudP').value = '';
+            document.getElementById('longitudT').value = '';
+            document.getElementById('suma').textContent = '0';
+
+          
+            contadorFila++;
+
+
+            document.getElementById('fila').focus();
+            
+     
+            alert(`Datos agregados correctamente. Se guardarán en la fila ${contadorFila-1} del Excel.`);
+        }
+
+        function exportarExcel() {
+            if (registros.length === 0) {
+                alert("No hay registros para exportar");
+                return;
+            }
+
+       
+            const wb = XLSX.utils.book_new();
+            
+           
+            const datosExcel = registros.map(registro => ({
+                "Fila": registro.fila,
+                "Calle": registro.calle,
+                "Cámara Superior": registro.camaraSuperior,
+                "Cámara Inferior": registro.camaraInferior,
+                "Longitud P": registro.longitudP,
+                "Longitud T": registro.longitudT,
+                "Suma": registro.suma
+            }));
+
+          
+            const ws = XLSX.utils.json_to_sheet(datosExcel);
+            
+        
+            XLSX.utils.book_append_sheet(wb, ws, "Registros");
+            
+          
+            XLSX.writeFile(wb, "registros_exportados.xlsx");
+            
+          
+        }
+    </script>
+</body>
+</html>
