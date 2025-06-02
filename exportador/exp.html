@@ -6,15 +6,15 @@
     <title>Registro de Datos con Exportación a Excel</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
     <style>
-        body {
+       body {
             font-family: Arial, sans-serif;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #5e5a4e;
         }
         .container {
-            background-color: white;
+            background-color: #726029;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -70,14 +70,14 @@
             padding: 10px;
             border-radius: 4px;
             margin-top: 10px;
-            text-align: center;
             font-weight: bold;
         }
         #suma {
             font-size: 18px;
             color: #2E7D32;
         }
-    </style>
+  
+    </style>       
 </head>
 <body>
     <div class="container">
@@ -104,18 +104,61 @@
         </div>
         
         <div class="form-group">
-            <label for="longitudP">Longitud P:</label>
+            <label for="longitudP">Longitud Propia:</label>
             <input type="number" id="longitudP" oninput="calcularSuma()">
         </div>
         
         <div class="form-group">
-            <label for="longitudT">Longitud T:</label>
+            <label for="longitudT">Longitud Tributaria:</label>
             <input type="number" id="longitudT" oninput="calcularSuma()">
         </div>
         
         <div class="suma-container">
-            <div>Suma de longitudes: <span id="suma">0</span></div>
+            <div>Longitud Acumulada: <span id="suma">0</span></div>
         </div>
+      
+        <div>.</div>
+      
+        <div class="form-group">
+            <label for="areaP">Area Propia:</label>
+            <input type="number" id="areaP" oninput="calcularArea()">
+        </div>
+        
+        <div class="form-group">
+            <label for="areaT">Area Tributaria:</label>
+            <input type="number" id="areaT" oninput="calcularArea()">
+        </div>
+        
+        <div class="suma-container">
+            <div>Area Acumulada: <span id="areaTotal">0</span></div>
+        </div>
+        
+         <fieldset id="anuncio">
+            <text>Asumimos el coeficiente de ecorrentia: <strong>C=0.3</strong></text>
+        </fieldset>
+        <fieldset id="anuncio">
+            <text>El Coeficiente de manning: <strong>n=0.01</strong></text>
+        </fieldset>
+        
+        <div class="form-group">
+            <label for="areaP">Velocidad(m/s):</label>
+            <input type="number" id="velocidad" oninput="calcularFlujo()">
+        </div>
+        
+        <div class="form-group">
+            <label for="areaT">T. Entrada(min):</label>
+            <input type="number" id="tentrada" oninput="calcularTiempo()">
+        </div>
+        
+        <div class="suma-container">
+            <div>T. Flujo(min): <span id="tflujo">0</span></div>
+        </div>
+        <div class="suma-container">
+            <div>T. Concentracion(min): <span id="tconcentracion">0</span></div>
+        </div>
+      
+      
+      
         
         <div class="buttons">
             <button id="pasarExcel" onclick="agregarRegistro()">Pasar a Excel</button>
@@ -124,8 +167,9 @@
     </div>
 
     <script>
-        let registros = [];
-        let contadorFila = 2; 
+        const velocidad = document.getElementById("velocidad");
+let registros = [];
+        let contadorFila = 2; // Empieza en 2 porque la fila 1 es el encabezado
 
         function calcularSuma() {
             const longitudP = parseFloat(document.getElementById('longitudP').value) || 0;
@@ -133,9 +177,28 @@
             const suma = longitudP + longitudT;
             document.getElementById('suma').textContent = suma;
         }
+        
+        function calcularArea() {
+            const areaP = parseFloat(document.getElementById('areaP').value) || 0;
+            const areaT = parseFloat(document.getElementById('areaT').value) || 0;
+            const areaTotal = areaP + areaT;
+            document.getElementById('areaTotal').textContent = areaTotal;
+        }
+        
+        function calcularFlujo(){
+           const lTotal=parseFloat(suma.textContent);
+           tflujo.textContent =((lTotal || 0 ) / (parseFloat(velocidad.value) || 0)).toFixed(2);
+        }
+     
+        function calcularTiempo(){
+           const flujo=parseFloat(tflujo.textContent);
+           tconcentracion.textContent =(parseFloat(tentrada.value) || 0) +  flujo || 0;
+        }
 
+   
+ 
         function agregarRegistro() {
-           
+            // Obtener valores de los inputs
             const fila = document.getElementById('fila').value;
             const calle = document.getElementById('calle').value;
             const camaraSuperior = document.getElementById('camaraSuperior').value;
@@ -143,14 +206,21 @@
             const longitudP = parseFloat(document.getElementById('longitudP').value) || 0;
             const longitudT = parseFloat(document.getElementById('longitudT').value) || 0;
             const suma = longitudP + longitudT;
+            const areaP = parseFloat(document.getElementById('areaP').value) || 0;
+            const areaT = parseFloat(document.getElementById('areaT').value) || 0;
+            const areaTotal = areaP + areaT;
+            const velocidad = parseFloat(document.getElementById('velocidad').value) || 0;
+            const tentrada = parseFloat(document.getElementById('tentrada').value) || 0;
+            const tflujo = suma / velocidad;
+            const tconcentracion = tentrada + tflujo;
 
-          
+            // Validar que todos los campos tengan datos
             if (!fila || !calle || !camaraSuperior || !camaraInferior || isNaN(longitudP) || isNaN(longitudT)) {
                 alert("Por favor complete todos los campos antes de continuar");
                 return;
             }
 
-           
+            // Agregar registro al array
             registros.push({
                 fila,
                 calle,
@@ -158,10 +228,17 @@
                 camaraInferior,
                 longitudP,
                 longitudT,
-                suma
+                suma,
+                areaP,
+                areaT,
+                areaTotal,
+                velocidad,
+                tentrada,
+                tflujo,
+                tconcentracion
             });
 
-
+            // Limpiar campos de entrada
             document.getElementById('fila').value = '';
             document.getElementById('calle').value = '';
             document.getElementById('camaraSuperior').value = '';
@@ -169,14 +246,22 @@
             document.getElementById('longitudP').value = '';
             document.getElementById('longitudT').value = '';
             document.getElementById('suma').textContent = '0';
-
+            document.getElementById('areaP').value = '';
+            document.getElementById('areaT').value = '';
+            document.getElementById('areaTotal').textContent = '0';
+            document.getElementById('velocidad').value = '';
+            document.getElementById('tentrada').value = '';
+            document.getElementById('tflujo').textContent = '0';
+            document.getElementById('tconcentracion').textContent = '0';
           
+          
+            // Incrementar contador de fila
             contadorFila++;
 
-
+            // Enfocar el primer campo para nueva entrada
             document.getElementById('fila').focus();
             
-     
+            // Mostrar confirmación al usuario
             alert(`Datos agregados correctamente. Se guardarán en la fila ${contadorFila-1} del Excel.`);
         }
 
@@ -186,30 +271,40 @@
                 return;
             }
 
-       
+            // Crear hoja de cálculo
             const wb = XLSX.utils.book_new();
             
-           
+            // Preparar datos en el formato correcto para Excel
             const datosExcel = registros.map(registro => ({
                 "Fila": registro.fila,
                 "Calle": registro.calle,
                 "Cámara Superior": registro.camaraSuperior,
                 "Cámara Inferior": registro.camaraInferior,
-                "Longitud P": registro.longitudP,
-                "Longitud T": registro.longitudT,
-                "Suma": registro.suma
+                "L. Propia": registro.longitudP,
+                "L. Tributaria": registro.longitudT,
+                "Long. Acumulada": registro.suma,
+                "A. Propia": registro.areaP,
+                "A. Tributaria": registro.areaT,
+                "Area Total": registro.areaTotal,
+                "Velocidad": registro.velocidad,
+                "T. Entrada": registro.tentrada,
+                "T. flujo": registro.tflujo,
+                "T. concen": registro.tconcentracion
+              
             }));
 
-          
+            // Convertir a hoja de cálculo
             const ws = XLSX.utils.json_to_sheet(datosExcel);
             
-        
+            // Agregar hoja al libro
             XLSX.utils.book_append_sheet(wb, ws, "Registros");
             
-          
+            // Exportar archivo
             XLSX.writeFile(wb, "registros_exportados.xlsx");
             
-          
+            // Opcional: Limpiar después de exportar
+            // registros = [];
+            // contadorFila = 2;
         }
     </script>
 </body>
