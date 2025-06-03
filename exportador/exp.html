@@ -156,7 +156,21 @@
         <div class="suma-container">
             <div>T. Concentracion(min): <span id="tconcentracion">0</span></div>
         </div>
-      
+
+        <div class="suma-container">
+            <div>La Intensidad(mm/hr) es: I= <span id="intensidad">0</span></div>
+        </div>
+        <div class="suma-container">
+            <div>El Caudal de diseño es: Qd(l/s)= <span id="caudaldiseño">0</span></div>
+        </div>
+       
+        <div class="form-group">
+            <label for="diametro">Diametro(mm):</label>
+            <input type="number" id="diametro" oninput="calcularradio()">
+        </div>
+        <div class="suma-container">
+            <div>El Radio Rh(m) es= <span id="radio">0</span></div>
+        </div>
       
       
         
@@ -194,6 +208,27 @@ let registros = [];
            const flujo=parseFloat(tflujo.textContent);
            tconcentracion.textContent =(parseFloat(tentrada.value) || 0) +  flujo || 0;
         }
+
+        function calcularIntensidad(){
+            const tconcentra=parseFloat(tconcentracion.textContent);
+            intensidad.textContent= (668/Math.pow(9.4+tconcentra, 0.9)).toFixed(2);
+        }
+        tentrada.addEventListener("input", calcularIntensidad);
+        calcularIntensidad();
+   
+        function calcularCaudalDeDiseño(){
+          const a=parseFloat(areaTotal.textContent);
+          const i=parseFloat(intensidad.textContent);
+          caudaldiseño.textContent= (2.78*0.3*a*i).toFixed(2);
+        }
+        tentrada.addEventListener("input", calcularCaudalDeDiseño);
+        calcularCaudalDeDiseño();
+       
+        function calcularradio(){
+            const d=parseFloat(diametro.value);
+            const operacion=parseFloat(d/4000);
+            radio.textContent=(operacion).toFixed(3);
+        }  
 
    
  
