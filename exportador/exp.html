@@ -156,7 +156,6 @@
         <div class="suma-container">
             <div>T. Concentracion(min): <span id="tconcentracion">0</span></div>
         </div>
-
         <div class="suma-container">
             <div>La Intensidad(mm/hr) es: I= <span id="intensidad">0</span></div>
         </div>
@@ -167,13 +166,47 @@
         <div class="form-group">
             <label for="diametro">Diametro(mm):</label>
             <input type="number" id="diametro" oninput="calcularradio()">
+        </div> 
+      
+        <div class="form-group">
+            <label for="cotat1">Cota 1 del terreno(Ct1): </label>
+            <input type="number" id="cotat1" oninput="calcularh1()">
         </div>
+        <div class="form-group">
+            <label for="cotat2">Cota 2 del terreno(Ct2): </label>
+            <input type="number" id="cotat2" oninput="calcularh2()">
+        </div>
+        <div class="form-group">
+            <label for="cotas1">Cota 1 de solera(Cs1): </label>
+            <input type="number" id="cotas1" oninput="calcularh1()">
+        </div>
+        <div class="form-group">
+            <label for="cotas2">Cota 2 de solera(Cs2): </label>
+            <input type="number" id="cotas2" oninput="calcularh2()">
+        </div>
+      
+        <div class="suma-container">
+            <div>La altura superior H1=  <span id="alturah1">0</span></div>
+        </div>
+        <div class="suma-container">
+            <div>La altura superior H2=  <span id="alturah2">0</span></div>
+        </div>
+        <div class="suma-container">
+            <div>La altura promedio Hp(m)= <span id="hpromedio">0</span></div>
+        </div>
+        <div class="suma-container">
+            <div>La pendiente S(%)=  <span id="pendiente">0</span></div>
+        </div>
+      
+      
+   
+      
+      
+      
+      
         <div class="suma-container">
             <div>El Radio Rh(m) es= <span id="radio">0</span></div>
         </div>
-      
-      
-        
         <div class="buttons">
             <button id="pasarExcel" onclick="agregarRegistro()">Pasar a Excel</button>
             <button id="exportar" onclick="exportarExcel()">Exportar Excel</button>
@@ -181,7 +214,8 @@
     </div>
 
     <script>
-        const velocidad = document.getElementById("velocidad");
+       const velocidad = document.getElementById("velocidad");
+document.getElementById('hpromedio').textContent = hpromedio;
 let registros = [];
         let contadorFila = 2; // Empieza en 2 porque la fila 1 es el encabezado
 
@@ -208,7 +242,7 @@ let registros = [];
            const flujo=parseFloat(tflujo.textContent);
            tconcentracion.textContent =(parseFloat(tentrada.value) || 0) +  flujo || 0;
         }
-
+        
         function calcularIntensidad(){
             const tconcentra=parseFloat(tconcentracion.textContent);
             intensidad.textContent= (668/Math.pow(9.4+tconcentra, 0.9)).toFixed(2);
@@ -223,12 +257,48 @@ let registros = [];
         }
         tentrada.addEventListener("input", calcularCaudalDeDiseño);
         calcularCaudalDeDiseño();
+
+        function calcularh1(){
+           const ct1=parseFloat(cotat1.value);
+           const cs1=parseFloat(cotas1.value);
+           alturah1.textContent=ct1-cs1;
+        }
+        
+        function calcularh2(){
+           const ct2=parseFloat(cotat2.value);
+           const cs2=parseFloat(cotas2.value);
+           alturah2.textContent=ct2-cs2;
+        }
+        
        
+
+        function calcularpendiente(){
+           const cs1 = parseFloat(cotas1.value);
+           const cs2 = parseFloat(cotas2.value);
+           const l = parseFloat(longitudP.value);
+           const sumax=(cs1-cs2)*100/l;
+           pendiente.textContent=sumax.toFixed(2);
+        }
+         cotas1.addEventListener("input", calcularpendiente);
+         cotas2.addEventListener("input", calcularpendiente);
+         calcularpendiente();
+
         function calcularradio(){
             const d=parseFloat(diametro.value);
             const operacion=parseFloat(d/4000);
             radio.textContent=(operacion).toFixed(3);
         }  
+        
+         function calcularhpromedio(){
+             const h1 = parseFloat(alturah1.textContent);
+             const h2 = parseFloat(alturah2.textContent);
+             const suma=(h1+h2)/2;
+             hpromedio.textContent=suma.toFixed(2);
+        }
+        cotas1.addEventListener("input", calcularhpromedio);
+        cotas2.addEventListener("input", calcularhpromedio);
+        calcularhpromedio();
+        
 
    
  
@@ -248,6 +318,18 @@ let registros = [];
             const tentrada = parseFloat(document.getElementById('tentrada').value) || 0;
             const tflujo = suma / velocidad;
             const tconcentracion = tentrada + tflujo;
+            const intensidad =  parseFloat(668/Math.pow(9.4+tconcentracion, 0.9)).toFixed(2);
+            const escorrentia = parseFloat(0.3);
+            const caudaldiseño =  parseFloat(2.78*0.3*areaTotal*intensidad).toFixed(2);
+            const diametro = parseFloat(document.getElementById('diametro').value);
+            const cotat1 = parseFloat(document.getElementById('cotat1').value) || 0;
+            const cotat2 = parseFloat(document.getElementById('cotat2').value) || 0;
+            const cotas1 = parseFloat(document.getElementById('cotas1').value) || 0;
+            const cotas2 = parseFloat(document.getElementById('cotas2').value) || 0;
+            const alturah1 =  parseFloat(cotat1-cotas1).toFixed(2);
+            const alturah2 =  parseFloat(cotat2-cotas2).toFixed(2);
+            const pendiente =  parseFloat((cotas1-cotas2)*100/longitudP).toFixed(2);
+            const hpromedio = parseFloat(((cotat1-cotas1)+(cotat2-cotas2))/2).toFixed(2);
 
             // Validar que todos los campos tengan datos
             if (!fila || !calle || !camaraSuperior || !camaraInferior || isNaN(longitudP) || isNaN(longitudT)) {
@@ -270,7 +352,21 @@ let registros = [];
                 velocidad,
                 tentrada,
                 tflujo,
-                tconcentracion
+                tconcentracion,
+                intensidad,
+                escorrentia,
+                caudaldiseño,
+                pendiente,
+                diametro,
+                cotat1,
+                cotat2,
+                alturah1,
+                alturah2,
+                hpromedio,
+                cotas1,
+                cotas2,
+                
+                
             });
 
             // Limpiar campos de entrada
@@ -288,6 +384,17 @@ let registros = [];
             document.getElementById('tentrada').value = '';
             document.getElementById('tflujo').textContent = '0';
             document.getElementById('tconcentracion').textContent = '0';
+            document.getElementById('intensidad').textContent = '0';
+            document.getElementById('caudaldiseño').textContent = '0';
+            document.getElementById('cotat1').value = '';
+            document.getElementById('cotat2').value = '';
+            document.getElementById('cotas1').textContent = '';
+            document.getElementById('cotas2').textContent = '';
+            document.getElementById('alturah1').textContent = '0';
+            document.getElementById('alturah2').textContent = '0';
+            document.getElementById('pendiente').textContent = '0';
+            document.getElementById('hpromedio').textContent = '0';
+            
           
           
             // Incrementar contador de fila
@@ -320,11 +427,24 @@ let registros = [];
                 "Long. Acumulada": registro.suma,
                 "A. Propia": registro.areaP,
                 "A. Tributaria": registro.areaT,
-                "Area Total": registro.areaTotal,
+                "Area Acum": registro.areaTotal,
                 "Velocidad": registro.velocidad,
                 "T. Entrada": registro.tentrada,
                 "T. flujo": registro.tflujo,
-                "T. concen": registro.tconcentracion
+                "T. Concen": registro.tconcentracion,
+                "Intensidad": registro.intensidad,
+                "Escorrentia":registro.escorrentia,           
+                "C. Diseño": registro.caudaldiseño,
+                "Pendiente": registro.pendiente,
+                "Diametro (mm)":registro.diametro,
+                "Cota t1": registro.cotat1,
+                "Cota t2": registro.cotat2,
+                "Profun Sup": registro.alturah1,
+                "Profun Inf": registro.alturah2,
+                "hpromedio":registro.hpromedio,
+                "Cota s1": registro.cotas1,
+                "Cota s2": registro.cotas2
+ 
               
             }));
 
