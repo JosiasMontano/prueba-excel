@@ -303,7 +303,7 @@ let registros = [];
    
  
         function agregarRegistro() {
-            // Obtener valores de los inputs
+            
             const fila = document.getElementById('fila').value;
             const calle = document.getElementById('calle').value;
             const camaraSuperior = document.getElementById('camaraSuperior').value;
@@ -331,13 +331,13 @@ let registros = [];
             const pendiente =  parseFloat((cotas1-cotas2)*100/longitudP).toFixed(2);
             const hpromedio = parseFloat(((cotat1-cotas1)+(cotat2-cotas2))/2).toFixed(2);
 
-            // Validar que todos los campos tengan datos
+            
             if (!fila || !calle || !camaraSuperior || !camaraInferior || isNaN(longitudP) || isNaN(longitudT)) {
                 alert("Por favor complete todos los campos antes de continuar");
                 return;
             }
 
-            // Agregar registro al array
+            
             registros.push({
                 fila,
                 calle,
@@ -369,7 +369,7 @@ let registros = [];
                 
             });
 
-            // Limpiar campos de entrada
+            
             document.getElementById('fila').value = '';
             document.getElementById('calle').value = '';
             document.getElementById('camaraSuperior').value = '';
@@ -397,13 +397,13 @@ let registros = [];
             
           
           
-            // Incrementar contador de fila
+            
             contadorFila++;
 
-            // Enfocar el primer campo para nueva entrada
+            
             document.getElementById('fila').focus();
             
-            // Mostrar confirmación al usuario
+         
             alert(`Datos agregados correctamente. Se guardarán en la fila ${contadorFila-1} del Excel.`);
         }
 
@@ -413,10 +413,10 @@ let registros = [];
                 return;
             }
 
-            // Crear hoja de cálculo
+            
             const wb = XLSX.utils.book_new();
             
-            // Preparar datos en el formato correcto para Excel
+         
             const datosExcel = registros.map(registro => ({
                 "Fila": registro.fila,
                 "Calle": registro.calle,
@@ -448,18 +448,16 @@ let registros = [];
               
             }));
 
-            // Convertir a hoja de cálculo
+           
             const ws = XLSX.utils.json_to_sheet(datosExcel);
             
-            // Agregar hoja al libro
+            
             XLSX.utils.book_append_sheet(wb, ws, "Registros");
             
-            // Exportar archivo
+          
             XLSX.writeFile(wb, "registros_exportados.xlsx");
             
-            // Opcional: Limpiar después de exportar
-            // registros = [];
-            // contadorFila = 2;
+            
         }
     </script>
 </body>
